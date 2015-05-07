@@ -1,2 +1,2 @@
 # clonut
-![My image](tscheibl.github.com/clonut/logo.png)
+<img src="logo.png" alt="Clonut logo" align="right" />
