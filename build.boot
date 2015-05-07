@@ -11,7 +11,7 @@
 (task-options!
  pom  {:project     'tscheibl/clonut
        :version     +version+
-       :description "TO BE WRITTEN"
+       :description "A core.async based, action triggered state loop for clojurescript"
        :url         "https://github.com/tscheibl/clonut"
        :scm         {:url "https://github.com/tscheibl/clonut.git"}
        :license     {"EPL" "https://github.com/tscheibl/clonut/blob/master/LICENSE"}})
