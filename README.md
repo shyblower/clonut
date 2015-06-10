@@ -1,4 +1,4 @@
-<img src="https://tscheibl.github.io/clonut/logo.png" alt="Clonut logo" align="right" />
+<img src="https://shyblower.github.io/clonut/logo.png" alt="Clonut logo" align="right" />
 <br/>
 <br/>
 # clonut
