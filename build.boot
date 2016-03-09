@@ -12,7 +12,7 @@
   pom  {:project     'shyblower/clonut
         :version     +version+
         :description "A core.async based, action triggered state loop for clojurescript"
-        :url         "https://github.com/tscheibl/clonut"
-        :scm         {:url "https://github.com/tscheibl/clonut.git"}
-        :license     {"EPL" "https://github.com/tscheibl/clonut/blob/master/LICENSE"}}
+        :url         "https://github.com/shyblower/clonut"
+        :scm         {:url "https://github.com/shyblower/clonut.git"}
+        :license     {"EPL" "https://github.com/shyblower/clonut/blob/master/LICENSE"}}
   target {:dir ["target"]})
