@@ -6,7 +6,7 @@
 (defn- mutate [action state]
   (or (action state) state))
 
-(defn create! [init-state & {:keys [action-buffer-size]
+(defn clonut [init-state & {:keys [action-buffer-size]
                              :or {action-buffer-size 100}}]
   (let [state-channel (chan)
         action-channel (chan action-buffer-size)]
@@ -14,7 +14,7 @@
     (put! state-channel init-state)
     [state-channel action-channel]))
 
-(defn destroy! [[state-channel action-channel]]
+(defn shutdown! [[state-channel action-channel]]
   (close! action-channel)
   (close! state-channel))
 
