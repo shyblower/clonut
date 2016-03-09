@@ -9,7 +9,7 @@
 (bootlaces! +version+)
 
 (task-options!
-  pom  {:project     'tscheibl/clonut
+  pom  {:project     'shyblower/clonut
         :version     +version+
         :description "A core.async based, action triggered state loop for clojurescript"
         :url         "https://github.com/tscheibl/clonut"
