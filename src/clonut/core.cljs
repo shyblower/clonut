@@ -1,7 +1,8 @@
 (ns clonut.core
   (:require [cljs.core.async
              :refer [chan pipe put! close!]
-             :as async]))
+             :as async]
+            [shyblower.helpers :refer [swapped-partial]]))
 
 (defn- mutate [action state]
   (or (action state) state))
@@ -40,3 +41,9 @@
    (wrap-middleware (create-post-middleware post-fn)))
   ([post-fn react-fn]
    (wrap-middleware (create-post-middleware post-fn) react-fn)))
+
+(defn action-fn [f & args]
+  (apply swapped-partial f args))
+
+(defn action [react-fn f]
+  (fn [& args] (react-fn (apply action-fn f args))))
