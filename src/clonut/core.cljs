@@ -31,8 +31,12 @@
       (when-let [new-state (pre-fn state)]
         (action-fn new-state)))))
 
-(defn action-fn [f & args]
+(defn action [f & args]
   (fn [state] (apply f state args)))
 
-(defn action [clonut! f]
-  (fn [& args] (clonut! (apply action-fn f args))))
+(defn handler [clonut! f]
+  (fn [& args] (clonut! (apply action f args))))
+
+(defn handlers [clonut! handlers]
+  (let [handler #(handler clonut! %)]
+    (reduce-kv #(assoc %1 %2 (handler %3)) {} handlers)))
