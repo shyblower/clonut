@@ -15,10 +15,6 @@
     (put! state-channel init-state)
     (fn [action-fn] (put! action-channel action-fn))))
 
-(defn wrap-middleware [clonut! middleware]
-  (fn [action-fn]
-    (clonut! (middleware action-fn))))
-
 (defn post-middleware [post-fn]
   (fn [action-fn]
     (fn [state]
@@ -34,9 +30,17 @@
 (defn action [f & args]
   (fn [state] (apply f state args)))
 
-(defn handler [clonut! f]
-  (fn [& args] (clonut! (apply action f args))))
+(defn handler
+  ([clonut! f]
+   (fn [& args] (clonut! (apply action f args))))
+  ([clonut! middleware f ]
+   (fn [& args] (clonut! (middleware (apply action f args))))))
 
-(defn handlers [clonut! handlers]
-  (let [handler #(handler clonut! %)]
-    (reduce-kv #(assoc %1 %2 (handler %3)) {} handlers)))
+(defn ^private handlers_ [handler-fn handlers]
+  (reduce-kv #(assoc %1 %2 (handler-fn %3)) {} handlers))
+
+(defn handlers
+  ([clonut! handlers]
+   (handlers_ #(handler clonut! %) handlers))
+  ([clonut! middleware handlers]
+   (handlers_ #(handler clonut! middleware %) handlers)))

@@ -5,4 +5,6 @@
      (post-middleware (fn [~state ~oldstate] ~@body))))
 
 (defmacro defhandlers [handlers-name handlers]
-  `(def ~handlers-name (fn [clonut!#] (handlers clonut!# ~handlers))))
+  `(def ~handlers-name (fn
+                         ([clonut!#] (handlers clonut!# ~handlers))
+                         ([clonut!# middleware#] (handlers clonut!# middleware# ~handlers)))))
