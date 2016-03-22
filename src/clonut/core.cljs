@@ -6,7 +6,7 @@
 (defn- mutate [action state]
   (or (action state) state))
 
-(defn clonut [& {:keys [action-buffer-size init-state middleware]
+(defn clonut [& {:keys [action-buffer-size init-state]
                  :or {action-buffer-size 100
                       init-state {}}}]
   (let [state-channel (chan)
@@ -14,6 +14,10 @@
     (pipe (async/map mutate [action-channel state-channel]) state-channel)
     (put! state-channel init-state)
     (fn [action-fn] (put! action-channel action-fn))))
+
+(defn add-middleware [clonut! middleware]
+  (fn [action-fn]
+    (clonut! (middleware action-fn))))
 
 (defn post-middleware [post-fn]
   (fn [action-fn]
