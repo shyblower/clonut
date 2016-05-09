@@ -37,7 +37,7 @@
 (defn handler
   ([clonut! f]
    (fn [& args] (clonut! (apply action f args))))
-  ([clonut! middleware f ]
+  ([clonut! middleware f]
    (fn [& args] (clonut! (middleware (apply action f args))))))
 
 (defn ^private handlers_ [handler-fn handlers]
