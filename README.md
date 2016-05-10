@@ -9,10 +9,13 @@ For the reasons outlined [here](https://github.com/levand/quiescent#rationale) I
 Since Quiescent does, in contrast to Om and Reagent, not manage your application state and does not control the render/re-render cycle, what I actually consider a feature than a lack, I can implement that in a way that fits my needs. What I do not want is to use 'add-watch' on an atom since it obscures control flow like AOP. Also I want to let the user of the toolkit decide, when to push state to the renderer.
 
 So this library is what I have come up with.
-Because of the wonderful [core.async](https://github.com/clojure/core.async) channel abstraction it is tiny in terms of code size.
 Since I have realized that this kind of looping state around in an asynchronous channel construct, could be of general use, I have decoupled it from Quiescent related code.
 
-I am also aware that this smells a bit of Clojure's agents, but since, to my knowledge, agents are not implemented in Clojurescript and the use of core.async channels allows for some amazing "tricks", I thought this could be useful for the community.
+I am also aware that this smells a bit of Clojure's agents, but since agents are not implemented in Clojurescript I thought this could be useful for the community.
+
+
+!!! THIS README IS OBSOLETE FOR THE CURRENT 2.0.0 RELEASE !!!
+
 
 ## A quick example for the impatient
 One of the manifold ways to use this
