@@ -31,20 +31,20 @@
       (when-let [new-state (pre-fn state)]
         (action-fn new-state)))))
 
-(defn action [f & args]
+(defn action-fn [f & args]
   (fn [state] (apply f state args)))
 
-(defn handler
+(defn action
   ([clonut! f]
-   (fn [& args] (clonut! (apply action f args))))
+   (fn [& args] (clonut! (apply action-fn f args))))
   ([clonut! middleware f]
-   (fn [& args] (clonut! (middleware (apply action f args))))))
+   (fn [& args] (clonut! (middleware (apply action-fn f args))))))
 
-(defn ^private handlers_ [handler-fn handlers]
-  (reduce-kv #(assoc %1 %2 (handler-fn %3)) {} handlers))
+(defn ^private actions_ [curried-action actions-map]
+  (reduce-kv #(assoc %1 %2 (curried-action %3)) {} actions-map))
 
-(defn handlers
-  ([clonut! handlers]
-   (handlers_ #(handler clonut! %) handlers))
-  ([clonut! middleware handlers]
-   (handlers_ #(handler clonut! middleware %) handlers)))
+(defn actions
+  ([clonut! actions-map]
+   (actions_ #(action clonut! %) actions-map))
+  ([clonut! middleware actions-map]
+   (actions_ #(action clonut! middleware %) actions-map)))

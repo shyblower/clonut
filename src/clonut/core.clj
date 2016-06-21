@@ -4,7 +4,7 @@
   `(defn ~mw-name [~@args]
      (post-middleware (fn [~state ~oldstate] ~@body))))
 
-(defmacro defhandlers [handlers-name handlers]
-  `(def ~handlers-name (fn
-                         ([clonut!#] (handlers clonut!# ~handlers))
-                         ([clonut!# middleware#] (handlers clonut!# middleware# ~handlers)))))
+(defmacro defactions [actions-name actions-map]
+  `(def ~actions-name (fn
+                         ([clonut!#] (actions clonut!# ~actions-map))
+                         ([clonut!# middleware#] (actions clonut!# middleware# ~actions-map)))))
