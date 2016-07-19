@@ -1,7 +1,8 @@
 (ns clonut.core
   (:require [cljs.core.async
-             :refer [chan pipe put! close!]
-             :as async]))
+             :refer [chan pipe put! close! <! >! poll!]
+             :as async])
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
 (defn- mutate [action state]
   (or (action state) state))
@@ -10,8 +11,16 @@
                  :or {action-buffer-size 100
                       init-state {}}}]
   (let [state-channel (chan)
-        action-channel (chan action-buffer-size)]
-    (pipe (async/map mutate [action-channel state-channel]) state-channel)
+        action-channel (chan action-buffer-size)
+        result-channel (chan 1)]
+    (pipe result-channel state-channel)
+    (go-loop []
+      (>! result-channel
+          (loop [state (mutate (<! action-channel) (<! state-channel))]
+            (if-let [next-action (poll! action-channel)]
+              (recur (mutate next-action state))
+              state)))
+      (recur))
     (put! state-channel init-state)
     (fn [action-fn] (put! action-channel action-fn))))
 
