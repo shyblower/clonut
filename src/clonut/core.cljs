@@ -24,21 +24,22 @@
     (put! state-channel init-state)
     (fn [action-fn] (put! action-channel action-fn))))
 
-(defn add-middleware [clonut! middleware]
-  (fn [action-fn]
-    (clonut! (middleware action-fn))))
+(defn middleware [middleware-fn]
+  (fn [clonut!]
+    (fn [action-fn]
+      (clonut! (middleware-fn action-fn)))))
 
-(defn post-middleware [post-fn]
-  (fn [action-fn]
-    (fn [state]
-      (when-let [new-state (action-fn state)]
-        (post-fn new-state state)))))
+(defn pre-middleware [middleware-fn]
+  (middleware
+    (fn [action-fn]
+      (fn [state]
+        (action-fn (middleware-fn state))))))
 
-(defn pre-middleware [pre-fn]
-  (fn [action-fn]
-    (fn [state]
-      (when-let [new-state (pre-fn state)]
-        (action-fn new-state)))))
+(defn post-middleware [middleware-fn]
+  (middleware
+    (fn [action-fn]
+      (fn [state]
+        (middleware-fn (action-fn state) state)))))
 
 (defn action-fn [f & args]
   (fn [state] (apply f state args)))
