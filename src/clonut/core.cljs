@@ -1,60 +1,52 @@
 (ns clonut.core
   (:require [cljs.core.async
-             :refer [chan pipe put! close! <! >! poll!]
+             :refer [chan sliding-buffer tap mult pipe put! <!]
              :as async])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
-(defn- mutate [action state]
-  (or (action state) state))
+(defn reactor [& {:keys [pre cmd-buf]
+                  :or {cmd-buf 10}}]
+  (let [<action> (chan cmd-buf)
+        <in> (chan)
+        <out> (chan)]
+    (if pre
+      (let [<pre-in> (chan)
+            <pre-out> (pre <pre-in> <action>)]
+        (go-loop []
+          (let [action (<! <action>)]
+            (put! <pre-in> (<! <in>))
+            (put! <out> (action (<! <pre-out>))))
+          (recur)))
+      (go-loop []
+        (put! <out> ((<! <action>) (<! <in>)))
+        (recur)))
+    [<action> <in> <out>]))
 
-(defn clonut [& {:keys [action-buffer-size init-state]
-                 :or {action-buffer-size 100
-                      init-state {}}}]
-  (let [state-channel (chan)
-        action-channel (chan action-buffer-size)
-        result-channel (chan 1)]
-    (pipe result-channel state-channel)
+(defn sink [sink-fn & {:keys [buf]}]
+  (let [<in> (chan buf)]
     (go-loop []
-      (>! result-channel
-          (loop [state (mutate (<! action-channel) (<! state-channel))]
-            (if-let [next-action (poll! action-channel)]
-              (recur (mutate next-action state))
-              state)))
+      (sink-fn (<! <in>))
       (recur))
-    (put! state-channel init-state)
-    (fn [action-fn] (put! action-channel action-fn))))
+    <in>))
 
-(defn middleware [middleware-fn]
-  (fn [clonut!]
-    (fn [action-fn]
-      (clonut! (middleware-fn action-fn)))))
+(defn sliding-sink [sink-fn]
+  (sink sink-fn :buf (sliding-buffer 1)))
 
-(defn pre-middleware [middleware-fn]
-  (middleware
-    (fn [action-fn]
-      (fn [state]
-        (action-fn (middleware-fn state))))))
+(defn clonut [state & {:keys [pre post cmd-buf]}]
+  (let [[<action> <in> <out>] (reactor :pre pre :cmd-buf cmd-buf)]
+    (pipe (if post (post <out> <action>) <out>)
+          <in>)
+    (put! <in> state)
+    <action>))
 
-(defn post-middleware [middleware-fn]
-  (middleware
-    (fn [action-fn]
-      (fn [state]
-        (middleware-fn (action-fn state) state)))))
+(defn pipe-mult [a-mult]
+  (let [<out> (chan)]
+    (tap a-mult <out>)
+    <out>))
 
-(defn action-fn [f & args]
-  (fn [state] (apply f state args)))
-
-(defn action
-  ([clonut! f]
-   (fn [& args] (clonut! (apply action-fn f args))))
-  ([clonut! middleware f]
-   (fn [& args] (clonut! (middleware (apply action-fn f args))))))
-
-(defn ^private actions_ [curried-action actions-map]
-  (reduce-kv #(assoc %1 %2 (curried-action %3)) {} actions-map))
-
-(defn actions
-  ([clonut! actions-map]
-   (actions_ #(action clonut! %) actions-map))
-  ([clonut! middleware actions-map]
-   (actions_ #(action clonut! middleware %) actions-map)))
+(defn tap-into [<in> taps]
+  (let [<out> (chan)
+        hub (mult <in>)]
+    (run! #(tap hub %) taps)
+    (tap hub <out>)
+    <out>))
