@@ -50,3 +50,6 @@
     (run! #(tap hub %) taps)
     (tap hub <out>)
     <out>))
+
+(defn action [f & args]
+  (fn [state] (apply f state args)))
