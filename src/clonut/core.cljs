@@ -1,8 +1,16 @@
 (ns clonut.core
-  (:require [cljs.core.async
-             :refer [chan sliding-buffer tap mult pipe put! <!]
-             :as async])
+  (:require [cljs.core.async :refer [chan sliding-buffer tap mult pipe put! <!]
+                             :as async]
+            [shyblower.helpers :refer [log-exception]]
+            [cljs.pprint :refer [pprint]])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
+
+(defn act [action state]
+  ; catch exceptions in action functions to make debugging easier
+  (try (action state)
+       (catch js/Error e
+         (log-exception e)
+         state)))
 
 (defn reactor [& {:keys [pre cmd-buf]
                   :or {cmd-buf 10}}]
@@ -15,10 +23,10 @@
         (go-loop []
           (let [action (<! <action>)]
             (put! <pre-in> (<! <in>))
-            (put! <out> (action (<! <pre-out>))))
+            (put! <out> (act action (<! <pre-out>))))
           (recur)))
       (go-loop []
-        (put! <out> ((<! <action>) (<! <in>)))
+        (put! <out> (act (<! <action>) (<! <in>)))
         (recur)))
     [<action> <in> <out>]))
 
