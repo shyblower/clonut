@@ -5,15 +5,15 @@
             [cljs.pprint :refer [pprint]])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
-(defn act [action state]
+(defn- act [action state]
   ; catch exceptions in action functions to make debugging easier
   (try (action state)
        (catch js/Error e
          (log-exception e)
          state)))
 
-(defn reactor [& {:keys [pre cmd-buf]
-                  :or {cmd-buf 10}}]
+(defn- reactor [& {:keys [pre cmd-buf]}
+                  :or {cmd-buf 10}]
   (let [<action> (chan cmd-buf)
         <in> (chan)
         <out> (chan)]
