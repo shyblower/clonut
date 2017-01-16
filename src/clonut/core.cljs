@@ -61,3 +61,6 @@
 
 (defn action [f & args]
   (fn [state] (apply f state args)))
+
+(defn act! [<action> f & args]
+  (put! <action> (apply action f args)))
