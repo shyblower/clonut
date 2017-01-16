@@ -12,8 +12,8 @@
          (log-exception e)
          state)))
 
-(defn- reactor [& {:keys [pre cmd-buf]}
-                  :or {cmd-buf 10}]
+(defn- reactor [& {:keys [pre cmd-buf]
+                   :or {cmd-buf 10}}]
   (let [<action> (chan cmd-buf)
         <in> (chan)
         <out> (chan)]
