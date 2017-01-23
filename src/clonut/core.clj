@@ -1,6 +1,6 @@
 (ns clonut.core)
 
-(defmacro action! [[state-symbol <action>] & body]
+(defmacro action! [[<action> state-symbol] & body]
   `(cljs.core.async/put! ~<action> (fn [~state-symbol] ~@body)))
 
 (defmacro def-action [fn-symbol args bindings & body]
